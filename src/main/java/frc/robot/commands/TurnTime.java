@@ -30,7 +30,6 @@ public class TurnTime extends CommandBase {
     m_drive = drive;
     addRequirements(drive);
   }
-
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {

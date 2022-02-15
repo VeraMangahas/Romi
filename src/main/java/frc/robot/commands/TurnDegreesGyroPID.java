@@ -6,11 +6,16 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class TurnDegrees extends CommandBase {
+public class TurnDegreesGyroPID extends CommandBase {
   private final Drivetrain m_drive;
   private final double m_degrees;
   private final double m_speed;
+  private final PIDController m_controller = new PIDController(0.03, 0, 0);
+
 
   /**
    * Creates a new TurnDegrees. This command will turn your robot for a desired rotation (in
@@ -20,7 +25,7 @@ public class TurnDegrees extends CommandBase {
    * @param degrees Degrees to turn. Leverages encoders to compare distance.
    * @param drive The drive subsystem on which this command will run
    */
-  public TurnDegrees(double speed, double degrees, Drivetrain drive) {
+  public TurnDegreesGyroPID(double speed, double degrees, Drivetrain drive) {
     m_degrees = degrees;
     m_speed = speed;
     m_drive = drive;
@@ -33,12 +38,19 @@ public class TurnDegrees extends CommandBase {
     // Set motors to stop, read encoder values for starting point
     m_drive.arcadeDrive(0, 0);
     m_drive.resetEncoders();
+    m_drive.resetGyro();
+    // Sets the error tolerance to 5, and the error derivative tolerance to 10 per second
+    m_controller.setTolerance(1, 5);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_drive.arcadeDrive(0, m_speed);
+    var pidOutput = m_controller.calculate(m_drive.getGyroAngleZ(), m_degrees);
+    // Clamps the controller output output between -0.5 and 0.5
+    pidOutput = MathUtil.clamp(pidOutput, -m_speed, m_speed);
+    SmartDashboard.putNumber("TurnPID", pidOutput);
+    m_drive.arcadeDrive(0, pidOutput); 
   }
 
   // Called once the command ends or is interrupted.
@@ -55,13 +67,7 @@ public class TurnDegrees extends CommandBase {
        has a wheel placement diameter (149 mm) - width of the wheel (8 mm) = 141 mm
        or 5.551 inches. We then take into consideration the width of the tires.
     */
-    double inchPerDegree = Math.PI * 5.551 / 360;
-    // Compare distance travelled from start to distance based on degree turn
-    return getAverageTurningDistance() >= (inchPerDegree * m_degrees);
-  }
-  private double getAverageTurningDistance() {
-    double leftDistance = Math.abs(m_drive.getLeftDistanceInch());
-    double rightDistance = Math.abs(m_drive.getRightDistanceInch());
-    return (leftDistance + rightDistance) / 2.0;
+   
+   return m_controller.atSetpoint();
   }
 }

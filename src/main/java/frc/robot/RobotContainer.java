@@ -10,13 +10,16 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.AutonomousDistance;
+import frc.robot.commands.AutonomousDrive;
 import frc.robot.commands.AutonomousTime;
+import frc.robot.sensors.RomiGyro;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.OnBoardIO;
 import frc.robot.subsystems.OnBoardIO.ChannelMode;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -80,32 +83,34 @@ public class RobotContainer {
         .whenActive(new PrintCommand("Button A Pressed"))
         .whenInactive(new PrintCommand("Button A Released"));
 
-        buttonA .whenPressed (toggCommand()) 
+      //When buttonA pressed forward and backward inverted
+    buttonA .whenPressed (toggCommand()) 
         .whenReleased (getArcadeDriveCommand());
 
      //turns red led on and off when B button pressed
     new JoystickButton(m_controller, XboxController.Button.kB.value)
-      .whenPressed(() -> {m_onboardIO.setRedLed(true);}, m_onboardIO);
+        .whenPressed(() -> {m_onboardIO.setRedLed(true);}, m_onboardIO);
     new JoystickButton(m_controller, XboxController.Button.kB.value)
         .whenReleased( () -> { m_onboardIO.setRedLed(false);}, m_onboardIO);
 
     //turns green led on and off when Y button pressed
     new JoystickButton(m_controller, XboxController.Button.kY.value)
-      .whenPressed(() -> { m_onboardIO.setGreenLed(true);}, m_onboardIO);
+        .whenPressed(() -> { m_onboardIO.setGreenLed(true);}, m_onboardIO);
     new JoystickButton(m_controller, XboxController.Button.kY.value)
-      .whenReleased(() -> { m_onboardIO.setGreenLed(false);}, m_onboardIO);
+        .whenReleased(() -> { m_onboardIO.setGreenLed(false);}, m_onboardIO);
 
     //turns yellow led on and off when X button pressed
     new JoystickButton(m_controller, XboxController.Button.kX.value)
-      .whenPressed(() -> { m_onboardIO.setYellowLed(true);}, m_onboardIO);
+        .whenPressed(() -> { m_onboardIO.setYellowLed(true);}, m_onboardIO);
       new JoystickButton(m_controller, XboxController.Button.kX.value)
-      .whenReleased(() -> {m_onboardIO.setYellowLed(false);}, m_onboardIO);
+        .whenReleased(() -> {m_onboardIO.setYellowLed(false);}, m_onboardIO);
 
 
     // Setup SmartDashboard options
-    m_chooser.setDefaultOption("Auto Routine Distance", new AutonomousDistance(m_drivetrain));
+    m_chooser.setDefaultOption("Auto Routine Drive", new AutonomousDrive(m_drivetrain, m_onboardIO));
+    m_chooser.addOption("Auto Routine Distance", new AutonomousDistance(m_drivetrain));
     m_chooser.addOption("Auto Routine Time", new AutonomousTime(m_drivetrain));
-    SmartDashboard.putData(m_chooser);
+    SmartDashboard.putData(m_chooser); 
   }
 
   /**
@@ -130,4 +135,9 @@ public class RobotContainer {
     return new ArcadeDrive(
         m_drivetrain, () -> m_controller.getRawAxis(1) + m_controller2.getRawAxis(1) , () -> -m_controller.getRawAxis(0) - m_controller.getRawAxis(0));
   }
+  public double getRomiGyro() {
+    return m_drivetrain.getGyroAngleZ();
+
+  }
+
 }

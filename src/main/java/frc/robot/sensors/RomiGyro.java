@@ -6,6 +6,7 @@ package frc.robot.sensors;
 
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
+import pabeles.concurrency.ConcurrencyOps.Reset;
 import edu.wpi.first.hal.SimDouble;
 
 public class RomiGyro {
@@ -24,6 +25,7 @@ public class RomiGyro {
   public RomiGyro() {
     SimDevice gyroSimDevice = SimDevice.create("Gyro:RomiGyro");
     if (gyroSimDevice != null) {
+
       gyroSimDevice.createBoolean("init", Direction.kOutput, true);
       m_simRateX = gyroSimDevice.createDouble("rate_x", Direction.kInput, 0.0);
       m_simRateY = gyroSimDevice.createDouble("rate_y", Direction.kInput, 0.0);
@@ -33,6 +35,7 @@ public class RomiGyro {
       m_simAngleY = gyroSimDevice.createDouble("angle_y", Direction.kInput, 0.0);
       m_simAngleZ = gyroSimDevice.createDouble("angle_z", Direction.kInput, 0.0);
     }
+    reset();
   }
 
   /**
@@ -44,7 +47,6 @@ public class RomiGyro {
     if (m_simRateX != null) {
       return m_simRateX.get();
     }
-
     return 0.0;
   }
 
@@ -57,7 +59,6 @@ public class RomiGyro {
     if (m_simRateY != null) {
       return m_simRateY.get();
     }
-
     return 0.0;
   }
 
@@ -70,7 +71,6 @@ public class RomiGyro {
     if (m_simRateZ != null) {
       return m_simRateZ.get();
     }
-
     return 0.0;
   }
 
@@ -83,7 +83,6 @@ public class RomiGyro {
     if (m_simAngleX != null) {
       return m_simAngleX.get() - m_angleXOffset;
     }
-
     return 0.0;
   }
 
@@ -96,7 +95,6 @@ public class RomiGyro {
     if (m_simAngleY != null) {
       return m_simAngleY.get() - m_angleYOffset;
     }
-
     return 0.0;
   }
 
@@ -109,7 +107,6 @@ public class RomiGyro {
     if (m_simAngleZ != null) {
       return m_simAngleZ.get() - m_angleZOffset;
     }
-
     return 0.0;
   }
 
